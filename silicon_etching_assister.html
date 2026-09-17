@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silicon Etching Assister</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom UI Enhancements */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; color: black !important; padding: 0 !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col antialiased">
+
+    <header class="bg-slate-950 border-b border-slate-800 sticky top-0 z-40 shadow-xl no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                        Silicon Etching Assister
+                    </h1>
+                    <p class="text-xs text-slate-400 font-mono">Semiconductor Etch Rate & Process Evaluator</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <button onclick="openModal('referenceModal')" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center space-x-1.5">
+                    <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <span>Reference Tables</span>
+                </button>
+                <button onclick="openModal('selectivityModal')" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center space-x-1.5">
+                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    <span>Selectivity Tool</span>
+                </button>
+                <button onclick="window.print()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-cyan-600 hover:bg-cyan-500 text-white transition shadow-lg shadow-cyan-600/30 flex items-center space-x-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    <span>Export / Print</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Layer Editor Controls (8 cols) -->
+        <section class="lg:col-span-8 space-y-5">
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-5 shadow-xl backdrop-blur-sm">
+                <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-700">
+                    <div>
+                        <h2 class="text-base font-semibold text-white flex items-center space-x-2">
+                            <span>1. Multilayer Stack Definition</span>
+                            <span id="layerBadge" class="text-xs bg-slate-700 text-slate-300 font-mono px-2 py-0.5 rounded-full">0 Layers</span>
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Configure material, thickness, etching type, and chemical etchant per layer.</p>
+                    </div>
+                    <button onclick="addLayer()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg shadow-lg shadow-emerald-600/20 transition flex items-center space-x-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span>＋ Add Layer</span>
+                    </button>
+                </div>
+
+                <!-- Dynamic Layer List -->
+                <div id="layersList" class="space-y-4">
+                    <!-- Layer cards inserted dynamically via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Visualization & Summary Panel (4 cols) -->
+        <section class="lg:col-span-4 space-y-5">
+            
+            <!-- Etch Time & Stack Summary -->
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-5 shadow-xl">
+                <h2 class="text-base font-semibold text-white mb-3 flex items-center space-x-2">
+                    <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    <span>Process Time Summary</span>
+                </h2>
+                <div class="space-y-3 font-mono text-sm">
+                    <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-700/60 flex justify-between items-center">
+                        <span class="text-xs text-slate-400">Total Stack Depth:</span>
+                        <span id="summaryTotalThickness" class="text-white font-bold text-base">0 nm</span>
+                    </div>
+                    <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-700/60 flex justify-between items-center">
+                        <span class="text-xs text-slate-400">Est. Total Etch Time:</span>
+                        <span id="summaryTotalTime" class="text-cyan-400 font-bold text-base">0.00 min</span>
+                    </div>
+                    <div class="text-[11px] text-slate-400 leading-relaxed font-sans bg-slate-900/40 p-2.5 rounded border border-slate-800">
+                        ⚡ <span class="text-slate-300 font-medium">Note:</span> Etch times are computed sequentially for all layers with available rate data based on target thickness and over-etch parameters.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual Wafer Cross-Section -->
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-5 shadow-xl flex flex-col">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-base font-semibold text-white flex items-center space-x-2">
+                        <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        <span>Wafer Profile Preview</span>
+                    </h2>
+                    <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/30">Scaled View</span>
+                </div>
+
+                <div class="bg-slate-950 border-2 border-slate-700 rounded-lg p-3 min-h-[260px] flex flex-col justify-start space-y-1.5 overflow-hidden relative">
+                    <div class="text-[10px] font-mono text-slate-500 text-center uppercase tracking-wider pb-1 border-b border-slate-800">
+                        Top Layer (Surface)
+                    </div>
+                    
+                    <div id="visualStack" class="flex flex-col gap-1 my-auto">
+                        <!-- Dynamic stack items generated here -->
+                    </div>
+
+                    <div class="text-[10px] font-mono text-slate-500 text-center uppercase tracking-wider pt-1 border-t border-slate-800">
+                        Silicon Substrate (Bulk Si)
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Reference Tables Modal -->
+    <div id="referenceModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+                <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    <span>Reference Etching Datasets (Original Course Tables)</span>
+                </h3>
+                <button onclick="closeModal('referenceModal')" class="text-slate-400 hover:text-white text-xl p-1">&times;</button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-8 text-xs font-sans text-slate-300">
+                <!-- Table 1 Display -->
+                <div>
+                    <h4 class="text-sm font-bold text-cyan-400 mb-2">Table 1: Isotropic Etchants (Etch Rate in nm/min)</h4>
+                    <div class="overflow-x-auto border border-slate-700 rounded-lg">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-950 text-slate-200 border-b border-slate-700 font-semibold">
+                                <tr>
+                                    <th class="p-2.5 border-r border-slate-800">Category / Etchant</th>
+                                    <th class="p-2.5 border-r border-slate-800">Target</th>
+                                    <th class="p-2.5 border-r border-slate-800">Poly n+</th>
+                                    <th class="p-2.5 border-r border-slate-800">Poly undoped</th>
+                                    <th class="p-2.5 border-r border-slate-800">SiO₂</th>
+                                    <th class="p-2.5 border-r border-slate-800">Si₃N₄</th>
+                                    <th class="p-2.5 border-r border-slate-800">PSG</th>
+                                    <th class="p-2.5 border-r border-slate-800">Al</th>
+                                    <th class="p-2.5 border-r border-slate-800">Ti</th>
+                                    <th class="p-2.5">Photoresist</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800 font-mono text-[11px]" id="table1Body">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Table 2 Display -->
+                <div>
+                    <h4 class="text-sm font-bold text-emerald-400 mb-2">Table 2: General Characteristics of Silicon Etching Operations</h4>
+                    <div class="overflow-x-auto border border-slate-700 rounded-lg">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-950 text-slate-200 border-b border-slate-700 font-semibold">
+                                <tr>
+                                    <th class="p-2.5 border-r border-slate-800">Type / Chemical</th>
+                                    <th class="p-2.5 border-r border-slate-800">Temp (°C)</th>
+                                    <th class="p-2.5 border-r border-slate-800">Si Etch Rate (μm/min)</th>
+                                    <th class="p-2.5 border-r border-slate-800">{111}/{100} Selectivity</th>
+                                    <th class="p-2.5 border-r border-slate-800">Nitride Rate (nm/min)</th>
+                                    <th class="p-2.5 border-r border-slate-800">SiO₂ Rate (nm/min)</th>
+                                    <th class="p-2.5">p++ Etch Stop</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800 font-mono text-[11px]" id="table2Body">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selectivity Calculator Modal -->
+    <div id="selectivityModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl max-w-xl w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                    <span>Selectivity Calculator Tool</span>
+                </h3>
+                <button onclick="closeModal('selectivityModal')" class="text-slate-400 hover:text-white text-xl">&times;</button>
+            </div>
+            <p class="text-xs text-slate-400">Calculate relative selectivity ratio $S_{A/B} = \text{Rate}_A / \text{Rate}_B$ between two materials under identical or different etching parameters.</p>
+            
+            <div class="grid grid-cols-2 gap-4 text-xs font-sans">
+                <!-- Layer/Material A -->
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2">
+                    <span class="font-semibold text-cyan-400">Material A (Target)</span>
+                    <input type="number" id="selRateA" placeholder="Etch Rate A" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-white font-mono" oninput="calcSelectivity()">
+                    <select id="selUnitA" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-slate-300" onchange="calcSelectivity()">
+                        <option value="nm">nm/min</option>
+                        <option value="um">μm/min</option>
+                    </select>
+                </div>
+                <!-- Layer/Material B -->
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2">
+                    <span class="font-semibold text-emerald-400">Material B (Substrate/Mask)</span>
+                    <input type="number" id="selRateB" placeholder="Etch Rate B" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-white font-mono" oninput="calcSelectivity()">
+                    <select id="selUnitB" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-slate-300" onchange="calcSelectivity()">
+                        <option value="nm">nm/min</option>
+                        <option value="um">μm/min</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 text-center font-mono space-y-1">
+                <div class="text-xs text-slate-400 uppercase tracking-wider">Calculated Selectivity Ratio (A : B)</div>
+                <div id="selectivityResult" class="text-2xl font-bold text-amber-400">-- : 1</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 border-t border-slate-800 py-4 text-center text-xs text-slate-500 no-print">
+        <p>Silicon Etching Assister • Semiconductor Engineering Course Tool</p>
+    </footer>
+
+    <script>
+        // STRICT DATASTORE FROM PROVIDED TABLES ONLY
+        const MATERIALS = [
+            { id: "SiO2", name: "Silicon Dioxide (SiO₂)", color: "#3b82f6" },
+            { id: "SiN", name: "Silicon Nitride (Si₃N₄)", color: "#10b981" },
+            { id: "PSG", name: "Phospho-silicate glass (PSG, annealed)", color: "#8b5cf6" },
+            { id: "Poly_n", name: "Polysilicon (n+)", color: "#f59e0b" },
+            { id: "Poly_undoped", name: "Polysilicon (undoped)", color: "#d97706" },
+            { id: "Bulk_Si", name: "Bulk Silicon (Si)", color: "#64748b" },
+            { id: "Al", name: "Aluminum (Al)", color: "#94a3b8" },
+            { id: "Ti", name: "Titanium (Ti)", color: "#cbd5e1" },
+            { id: "PR", name: "Photoresist (OCG-820PR)", color: "#ef4444" }
+        ];
+
+        // Table 1 Data: Isotropic Etchants (rates in nm/min)
+        const TABLE_1 = [
+            {
+                name: "Concentrated HF (49%)", type: "wet", target: "Silicon oxides",
+                rates: { SiO2: 2300, SiN: 14, PSG: 3600, Poly_n: 0, Al: 4.2, Ti: ">1000", PR: 0 }
+            },
+            {
+                name: "25:1 HF:H2O", type: "wet", target: "Silicon oxides",
+                rates: { SiO2: 9.7, SiN: 0.6, PSG: 150, Poly_n: 0, Poly_undoped: 0, PR: 0 }
+            },
+            {
+                name: "5:1 BHF", type: "wet", target: "Silicon oxides",
+                rates: { Poly_n: 9, Poly_undoped: 2, SiO2: 100, SiN: 0.9, PSG: 440, Al: 140, Ti: ">1000", PR: 0 }
+            },
+            {
+                name: "Silicon etchant (126 HNO3:60 H2O:5 NH4F)", type: "wet", target: "Silicon",
+                rates: { Poly_n: 310, Poly_undoped: 100, SiO2: 9, SiN: 0.2, PSG: 170, Al: 400, Ti: 300, PR: 0 }
+            },
+            {
+                name: "Aluminum etchant (16 H3PO4:1 HNO3:1 HAc:2 H2)", type: "wet", target: "Aluminum",
+                rates: { Poly_n: "<1", Poly_undoped: "<1", SiO2: 0, SiN: 0, PSG: "<1", Al: 660, Ti: 0, PR: 0 }
+            },
+            {
+                name: "Titanium etchant (20 H2O:1 H2O2:1 HF)", type: "wet", target: "Titanium",
+                rates: { Poly_n: 1.2, SiO2: 12, SiN: 0.8, PSG: 210, Al: ">10", Ti: 880, PR: 0 }
+            },
+            {
+                name: "Piranha (50 H2SO4:1 H2O2)", type: "wet", target: "Metals and organics",
+                rates: { Poly_n: 0, Poly_undoped: 0, SiO2: 0, SiN: 0, PSG: 0, Al: 180, Ti: 240, PR: ">10" }
+            },
+            {
+                name: "Acetone (CH3COOH)", type: "wet", target: "Photoresist",
+                rates: { Poly_n: 0, Poly_undoped: 0, SiO2: 0, SiN: 0, PSG: 0, Al: 0, Ti: 0, PR: ">4000" }
+            },
+            {
+                name: "CF4 + CHF3 + He, 450 W", type: "dry", target: "Silicon oxides",
+                rates: { Poly_n: 190, Poly_undoped: 210, SiO2: 470, SiN: 180, PSG: 620, Ti: ">1000", PR: 220 }
+            },
+            {
+                name: "SF6 + He, 100 W", type: "dry", target: "Silicon nitrides",
+                rates: { Poly_n: 73, Poly_undoped: 67, SiO2: 31, SiN: 82, PSG: 61, Ti: ">1000", PR: 69 }
+            },
+            {
+                name: "SF6, 12.5 W", type: "dry", target: "Thin silicon nitrides",
+                rates: { Poly_n: 170, Poly_undoped: 280, SiO2: 110, SiN: 280, PSG: 140, Ti: ">1000", PR: 310 }
+            },
+            {
+                name: "O2, 400 W", type: "dry", target: "Ashing photoresist",
+                rates: { Poly_n: 0, Poly_undoped: 0, SiO2: 0, SiN: 0, PSG: 0, Al: 0, Ti: 0, PR: 340 }
+            }
+        ];
+
+        // Table 2 Data: General Characteristics of Silicon Etching Operations
+        const TABLE_2 = [
+            {
+                name: "HF:HNO3:CH3COOH (25°C)", type: "wet", temp: "25°C", target: "Bulk Silicon",
+                siRateUm: "1–20", selectivity111: "—", nitrideRateNm: "Low", sio2RateNm: "10–30", etchStop: "No"
+            },
+            {
+                name: "KOH (70–90°C)", type: "wet", temp: "70–90°C", target: "Bulk Silicon",
+                siRateUm: "0.5–2", selectivity111: "100:1", nitrideRateNm: "<1", sio2RateNm: "10", etchStop: "Yes"
+            },
+            {
+                name: "Ethylene-diamine pyrocatechol (EDP) (115°C)", type: "wet", temp: "115°C", target: "Bulk Silicon",
+                siRateUm: "0.75", selectivity111: "35:1", nitrideRateNm: "0.1", sio2RateNm: "0.2", etchStop: "Yes"
+            },
+            {
+                name: "N(CH3)4OH (TMAH) (90°C)", type: "wet", temp: "90°C", target: "Bulk Silicon",
+                siRateUm: "0.5–1.5", selectivity111: "50:1", nitrideRateNm: "<0.1", sio2RateNm: "<0.1", etchStop: "Yes"
+            },
+            {
+                name: "SF6 (0–100°C)", type: "dry", temp: "0–100°C", target: "Bulk Silicon",
+                siRateUm: "0.1–0.5", selectivity111: "—", nitrideRateNm: "200", sio2RateNm: "10", etchStop: "No"
+            },
+            {
+                name: "SF6/C4F8 (DRIE) (20–80°C)", type: "dry", temp: "20–80°C", target: "Bulk Silicon",
+                siRateUm: "1–3", selectivity111: "—", nitrideRateNm: "200", sio2RateNm: "10", etchStop: "No"
+            }
+        ];
+
+        // State Array
+        let layers = [];
+
+        // Add Layer Function
+        function addLayer() {
+            const newLayer = {
+                id: Date.now(),
+                material: "SiO2",
+                thickness: 500,
+                unit: "nm",
+                etchType: "wet",
+                etchant: "Concentrated HF (49%)",
+                overEtch: 10,
+                customTime: null
+            };
+            layers.push(newLayer);
+            renderLayers();
+        }
+
+        function removeLayer(id) {
+            layers = layers.filter(l => l.id !== id);
+            renderLayers();
+        }
+
+        function updateLayer(id, key, value) {
+            const layer = layers.find(l => l.id === id);
+            if (!layer) return;
+
+            layer[key] = value;
+
+            // If switching etchType or material, pick first supported etchant
+            if (key === 'etchType' || key === 'material') {
+                const validEtchants = getValidEtchants(layer.material, layer.etchType);
+                layer.etchant = validEtchants.length > 0 ? validEtchants[0] : "";
+            }
+
+            renderLayers();
+        }
+
+        // Filter supported etchants strictly from datasets
+        function getValidEtchants(material, etchType) {
+            const list = [];
+
+            // From Table 1
+            TABLE_1.filter(e => e.type === etchType).forEach(e => {
+                if (e.rates && e.rates[material] !== undefined) {
+                    list.push(e.name);
+                }
+            });
+
+            // From Table 2
+            TABLE_2.filter(e => e.type === etchType).forEach(e => {
+                if (material === "Bulk_Si") {
+                    list.push(e.name);
+                } else if (material === "SiN" && e.nitrideRateNm !== undefined) {
+                    list.push(e.name);
+                } else if (material === "SiO2" && e.sio2RateNm !== undefined) {
+                    list.push(e.name);
+                }
+            });
+
+            return [...new Set(list)];
+        }
+
+        // Lookup Etch Rate from Data Tables
+        function lookupRate(material, etchantName) {
+            // Check Table 1
+            const t1 = TABLE_1.find(e => e.name === etchantName);
+            if (t1 && t1.rates && t1.rates[material] !== undefined) {
+                const rawVal = t1.rates[material];
+                return {
+                    valDisplay: `${rawVal} nm/min`,
+                    valNmMin: typeof rawVal === 'number' ? rawVal : parseFloat(rawVal) || null,
+                    tableRef: "Table 1 (Isotropic)"
+                };
+            }
+
+            // Check Table 2
+            const t2 = TABLE_2.find(e => e.name === etchantName);
+            if (t2) {
+                if (material === "Bulk_Si") {
+                    // Rates in um/min
+                    const umRateStr = t2.siRateUm;
+                    // Compute average for calculation if range
+                    let avgUm = parseFloat(umRateStr);
+                    if (umRateStr.includes('–')) {
+                        const parts = umRateStr.split('–').map(p => parseFloat(p));
+                        avgUm = (parts[0] + parts[1]) / 2;
+                    }
+                    return {
+                        valDisplay: `${umRateStr} μm/min (${avgUm * 1000} nm/min avg)`,
+                        valNmMin: avgUm * 1000,
+                        tableRef: `Table 2 (${t2.temp}, {111}/{100}: ${t2.selectivity111}, p++ Stop: ${t2.etchStop})`
+                    };
+                } else if (material === "SiN") {
+                    const rawVal = t2.nitrideRateNm;
+                    return {
+                        valDisplay: `${rawVal} nm/min`,
+                        valNmMin: parseFloat(rawVal) || null,
+                        tableRef: `Table 2 (${t2.temp})`
+                    };
+                } else if (material === "SiO2") {
+                    const rawVal = t2.sio2RateNm;
+                    return {
+                        valDisplay: `${rawVal} nm/min`,
+                        valNmMin: parseFloat(rawVal) || null,
+                        tableRef: `Table 2 (${t2.temp})`
+                    };
+                }
+            }
+
+            return { valDisplay: "Data not available", valNmMin: null, tableRef: null };
+        }
+
+        function renderLayers() {
+            const container = document.getElementById('layersList');
+            const visualContainer = document.getElementById('visualStack');
+            container.innerHTML = '';
+            visualContainer.innerHTML = '';
+
+            let totalStackNm = 0;
+            let totalEstMin = 0;
+
+            document.getElementById('layerBadge').innerText = `${layers.length} Layer${layers.length === 1 ? '' : 's'}`;
+
+            if (layers.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 border-2 border-dashed border-slate-700/80 rounded-xl">
+                        <p class="text-slate-400 text-sm">No material layers added yet.</p>
+                        <button onclick="addLayer()" class="mt-3 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg">
+                            ＋ Add First Layer
+                        </button>
+                    </div>
+                `;
+            }
+
+            layers.forEach((layer, idx) => {
+                const thickNm = layer.unit === 'um' ? layer.thickness * 1000 : layer.thickness;
+                totalStackNm += thickNm;
+
+                const validEtchants = getValidEtchants(layer.material, layer.etchType);
+                if (!validEtchants.includes(layer.etchant) && validEtchants.length > 0) {
+                    layer.etchant = validEtchants[0];
+                }
+
+                const rateData = lookupRate(layer.material, layer.etchant);
+                
+                // Calculate time
+                let estTimeMin = 0;
+                let timeDisplay = "Data not available";
+
+                if (rateData.valNmMin && rateData.valNmMin > 0) {
+                    const targetDepth = thickNm * (1 + (layer.overEtch || 0) / 100);
+                    estTimeMin = targetDepth / rateData.valNmMin;
+                    totalEstMin += estTimeMin;
+                    timeDisplay = `${estTimeMin.toFixed(2)} min (${(estTimeMin * 60).toFixed(1)} sec)`;
+                }
+
+                const matObj = MATERIALS.find(m => m.id === layer.material) || MATERIALS[0];
+
+                // Create Control Card
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-700/80 rounded-xl p-4 space-y-3 relative group transition hover:border-slate-600 shadow-md";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${matObj.color}"></span>
+                            <span class="font-bold text-slate-200 text-sm">Layer ${idx + 1}</span>
+                            <span class="text-xs text-slate-400 font-mono">(${layer.thickness} ${layer.unit})</span>
+                        </div>
+                        <button onclick="removeLayer(${layer.id})" class="text-slate-500 hover:text-rose-400 text-xs font-medium transition flex items-center space-x-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            <span>Remove</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                        <!-- Material -->
+                        <div>
+                            <label class="block text-slate-400 text-[11px] mb-1">Target Material</label>
+                            <select onchange="updateLayer(${layer.id}, 'material', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-cyan-500 focus:outline-none">
+                                ${MATERIALS.map(m => `<option value="${m.id}" ${m.id === layer.material ? 'selected' : ''}>${m.name}</option>`).join('')}
+                            </select>
+                        </div>
+
+                        <!-- Thickness -->
+                        <div>
+                            <label class="block text-slate-400 text-[11px] mb-1">Layer Thickness</label>
+                            <div class="flex space-x-1">
+                                <input type="number" min="0" value="${layer.thickness}" onchange="updateLayer(${layer.id}, 'thickness', parseFloat(this.value) || 0)" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono focus:border-cyan-500 focus:outline-none" />
+                                <select onchange="updateLayer(${layer.id}, 'unit', this.value)" class="bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-300 focus:outline-none">
+                                    <option value="nm" ${layer.unit === 'nm' ? 'selected' : ''}>nm</option>
+                                    <option value="um" ${layer.unit === 'um' ? 'selected' : ''}>μm</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Etching Type -->
+                        <div>
+                            <label class="block text-slate-400 text-[11px] mb-1">Etching Mode</label>
+                            <select onchange="updateLayer(${layer.id}, 'etchType', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-cyan-500 focus:outline-none">
+                                <option value="wet" ${layer.etchType === 'wet' ? 'selected' : ''}>Wet Etching</option>
+                                <option value="dry" ${layer.etchType === 'dry' ? 'selected' : ''}>Dry (Plasma) Etching</option>
+                            </select>
+                        </div>
+
+                        <!-- Etchant -->
+                        <div>
+                            <label class="block text-slate-400 text-[11px] mb-1">Chemical Etchant</label>
+                            <select onchange="updateLayer(${layer.id}, 'etchant', this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-cyan-500 focus:outline-none truncate">
+                                ${validEtchants.length > 0 
+                                    ? validEtchants.map(e => `<option value="${e}" ${e === layer.etchant ? 'selected' : ''}>${e}</option>`).join('')
+                                    : `<option value="">Data not available</option>`
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Calculated Results Strip -->
+                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 flex flex-wrap items-center justify-between text-xs gap-2">
+                        <div class="flex items-center space-x-4">
+                            <div>
+                                <span class="text-slate-500 text-[10px] block uppercase">Etch Rate</span>
+                                <span class="font-mono font-semibold ${rateData.valNmMin !== null ? 'text-emerald-400' : 'text-rose-400'}">${rateData.valDisplay}</span>
+                            </div>
+                            ${rateData.tableRef ? `
+                                <div class="hidden sm:block border-l border-slate-800 pl-3">
+                                    <span class="text-slate-500 text-[10px] block uppercase">Source Context</span>
+                                    <span class="text-slate-400 text-[11px] font-mono">${rateData.tableRef}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <div>
+                                <span class="text-slate-500 text-[10px] block uppercase">Over-etch (%)</span>
+                                <input type="number" value="${layer.overEtch}" onchange="updateLayer(${layer.id}, 'overEtch', parseFloat(this.value) || 0)" class="w-14 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-center text-slate-200 font-mono text-xs" />
+                            </div>
+                            <div class="text-right">
+                                <span class="text-slate-500 text-[10px] block uppercase">Est. Etch Time</span>
+                                <span class="font-mono font-bold text-cyan-400">${timeDisplay}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+
+                // Add to Visual Wafer Stack
+                const visualBlock = document.createElement('div');
+                const flexGrow = Math.max(1, Math.round(thickNm / 100));
+                visualBlock.className = "w-full rounded px-2 py-1.5 text-center text-xs font-mono font-semibold text-white shadow transition-all flex items-center justify-between truncate";
+                visualBlock.style.backgroundColor = matObj.color;
+                visualBlock.style.flex = `${flexGrow} 0 auto`;
+                visualBlock.innerHTML = `
+                    <span class="truncate">Layer ${idx + 1}: ${matObj.name}</span>
+                    <span class="text-[10px] bg-black/30 px-1.5 py-0.5 rounded font-mono ml-2">${layer.thickness} ${layer.unit}</span>
+                `;
+                visualContainer.appendChild(visualBlock);
+            });
+
+            // Update Summaries
+            document.getElementById('summaryTotalThickness').innerText = `${totalStackNm >= 1000 ? (totalStackNm/1000).toFixed(2) + ' μm' : totalStackNm + ' nm'}`;
+            document.getElementById('summaryTotalTime').innerText = `${totalEstMin.toFixed(2)} min (${(totalEstMin * 60).toFixed(0)} sec)`;
+        }
+
+        function calcSelectivity() {
+            const rA = parseFloat(document.getElementById('selRateA').value) || 0;
+            const uA = document.getElementById('selUnitA').value;
+            const rB = parseFloat(document.getElementById('selRateB').value) || 0;
+            const uB = document.getElementById('selUnitB').value;
+
+            if (rA <= 0 || rB <= 0) {
+                document.getElementById('selectivityResult').innerText = "-- : 1";
+                return;
+            }
+
+            // Convert all to nm/min for ratio
+            const valA_nm = uA === 'um' ? rA * 1000 : rA;
+            const valB_nm = uB === 'um' ? rB * 1000 : rB;
+
+            const ratio = (valA_nm / valB_nm).toFixed(2);
+            document.getElementById('selectivityResult').innerText = `${ratio} : 1`;
+        }
+
+        function populateReferenceModal() {
+            const t1Body = document.getElementById('table1Body');
+            t1Body.innerHTML = '';
+            TABLE_1.forEach(e => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-2 border-r border-slate-800 font-medium text-white">${e.name}</td>
+                    <td class="p-2 border-r border-slate-800 text-slate-400">${e.target}</td>
+                    <td class="p-2 border-r border-slate-800">${e.rates.Poly_n ?? '—'}</td>
+                    <td class="p-2 border-r border-slate-800">${e.rates.Poly_undoped ?? '—'}</td>
+                    <td class="p-2 border-r border-slate-800">${e.rates.SiO2 ?? '—'}</td>
+                    <td class="p-2 border-r border-slate-800">${e.rates.SiN ?? '—'}</td>
+                    <td class="p-2 border-r border-slate-800">${e.rates.PSG ?? '—'}</td>
+                    <td class="p-2 border-r border-slate-800">${e.rates.Al ?? '—'}</td>
+                    <td class="p-2 border-r border-slate-800">${e.rates.Ti ?? '—'}</td>
+                    <td class="p-2">${e.rates.PR ?? '—'}</td>
+                `;
+                t1Body.appendChild(tr);
+            });
+
+            const t2Body = document.getElementById('table2Body');
+            t2Body.innerHTML = '';
+            TABLE_2.forEach(e => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-2 border-r border-slate-800 font-medium text-white">${e.name}</td>
+                    <td class="p-2 border-r border-slate-800">${e.temp}</td>
+                    <td class="p-2 border-r border-slate-800 font-bold text-cyan-400">${e.siRateUm}</td>
+                    <td class="p-2 border-r border-slate-800">${e.selectivity111}</td>
+                    <td class="p-2 border-r border-slate-800">${e.nitrideRateNm}</td>
+                    <td class="p-2 border-r border-slate-800">${e.sio2RateNm}</td>
+                    <td class="p-2">${e.etchStop}</td>
+                `;
+                t2Body.appendChild(tr);
+            });
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // Initialize App on Load
+        window.onload = function() {
+            populateReferenceModal();
+            // Default 2-layer stack demo
+            layers = [
+                { id: 1, material: "SiO2", thickness: 500, unit: "nm", etchType: "wet", etchant: "Concentrated HF (49%)", overEtch: 10 },
+                { id: 2, material: "Bulk_Si", thickness: 10, unit: "um", etchType: "wet", etchant: "KOH (70–90°C)", overEtch: 5 }
+            ];
+            renderLayers();
+        };
+    </script>
+</body>
+</html>
